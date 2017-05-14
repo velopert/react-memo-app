@@ -40,6 +40,18 @@ class App extends Component {
         const { MemoActions } = this.props;
         MemoActions.getInitialMemo();
         window.addEventListener('scroll', this.handleScroll);
+
+        // short-polling 으로 5초마다 새 데이터 불러오기 시도
+        this.getRecentMemo();
+    }
+
+    getRecentMemo = () => {
+        const { MemoActions, cursor } = this.props;
+        MemoActions.getRecentMemo(cursor ? cursor : 0);
+        
+        setTimeout(() => {
+            this.getRecentMemo();
+        }, 1000 * 5);
     }
     
     render() {
@@ -59,6 +71,7 @@ class App extends Component {
 
 export default connect(
     (state) => ({
+        cursor: state.memo.getIn(['data', 0, 'id']),
         endCursor: state.memo.getIn(['data', state.memo.get('data').size - 1, 'id']),
         loading: state.pender.pending['memo/GET_PREVIOUS_MEMO']
     }),
